@@ -31,6 +31,14 @@ menuconfig MOD_ENABLE_SH2
     bool "SH2 (SH2 Sensorhub Protocol)"
     default n
 
+
+menuconfig MOD_ENABLE_SOFT_PWM
+    bool "Soft-PWM (Generate PWM on gpios by software)"
+    default n
+if MOD_ENABLE_SOFT_PWM
+source "driver/soft_pwm/Kconfig"
+endif
+
 menuconfig MOD_ENABLE_SPIF
     bool "SPIF (SPI Flash)"
     select MOD_ENABLE_LOG

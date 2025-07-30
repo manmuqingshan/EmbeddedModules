@@ -28,7 +28,6 @@
 #endif
 #if (MOD_CFG_USE_OS_KLITE)
 #include "klite.h"
-#include "klite_dbg.h"
 #define SHOWKLITE 1
 #endif
 
@@ -447,6 +446,25 @@ static void memdump_cmd_func(EmbeddedCli* cli, char* args, void* context) {
     }
 }
 
+static void timeit_cmd_func(EmbeddedCli* cli, char* args, void* context) {
+    int argc = embeddedCliGetTokenCount(args);
+    if (argc < 1) {
+        embeddedCliPrintCurrentHelp(cli);
+        return;
+    }
+    const char* cmd = embeddedCliPopToken(&args);
+    void (*func)(EmbeddedCli* cli, char* args, void* context) =
+        embeddedCliSwitchToCommandEntry(cli, cmd);
+    if (func == NULL) {
+        PRINTLN(T_FMT(T_BOLD, T_RED) "Timeit: Command not found" T_RST);
+        return;
+    }
+    m_time_t t = m_time_us();
+    func(cli, args, context);
+    t = m_time_us() - t;
+    PRINTLN(T_FMT(T_BOLD, T_YELLOW) "Timeit: %d us" T_RST, t);
+}
+
 #if KLITE_CFG_TRACE_HEAP_OWNER
 #include "klite.h"
 
@@ -470,7 +488,7 @@ static void trace_mem_cmd_func(EmbeddedCli* cli, char* args, void* context) {
     void* iter_tmp = NULL;
     kl_thread_t owner = NULL;
     kl_size_t addr = 0, used = 0, size = 0;
-    while (kl_dbg_heap_iter_nodes(&iter_tmp, &owner, &addr, &used, &size)) {
+    while (kl_trace_heap_iter_nodes(&iter_tmp, &owner, &addr, &used, &size)) {
         if ((fpid != -1 && kl_thread_id(owner) != fpid) || (size < fsize))
             continue;
         if (frag_only && used == size)
@@ -498,7 +516,7 @@ static void trace_mutex_cmd_func(EmbeddedCli* cli, char* args, void* context) {
     kl_mutex_t mutex = NULL;
     kl_thread_t owner = NULL;
     kl_size_t lock = 0;
-    while (kl_dbg_mutex_iter_locks(&iter_tmp, &owner, &mutex, &lock)) {
+    while (kl_trace_mutex_iter_locks(&iter_tmp, &owner, &mutex, &lock)) {
         PRINT(T_FMT(T_GREEN) "0x%X - ", mutex);
         if (owner == NULL)
             PRINT("free");
@@ -548,6 +566,15 @@ void system_utils_add_command_to_cli(EmbeddedCli* cli) {
         .func = memdump_cmd_func,
     };
     embeddedCliAddBinding(cli, memdump_cmd);
+    static CliCommandBinding timeit_cmd = {
+        .name = "timeit",
+        .usage = "timeit <cmd> [args...]",
+        .help = "Time the execution of a command",
+        .context = NULL,
+        .autoTokenizeArgs = 1,
+        .func = timeit_cmd_func,
+    };
+    embeddedCliAddBinding(cli, timeit_cmd);
 #if KLITE_CFG_TRACE_HEAP_OWNER
     static CliCommandBinding trace_mem_cmd = {
         .name = "trace_mem",

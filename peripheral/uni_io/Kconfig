@@ -17,7 +17,7 @@ if UIO_CFG_ENABLE_UART
         Enable FIFO Transmit for UART
 
     if UIO_CFG_UART_ENABLE_FIFO_TX
-        config UIO_CFG_UART_TX_TIMEOUT
+        config UIO_CFG_UART_FIFO_TIMEOUT
             int "FIFO Transmit Timeout (ms)"
             default 5
             range -1 100
@@ -76,6 +76,13 @@ if UIO_CFG_ENABLE_CDC
             help
                 Use Cherry USB CDC Interface
     endchoice
+
+    config UIO_CFG_CDC_CUBEMX_SPEED_FS
+        bool "Use FS Speed for CubeMX CDC"
+        default n
+        depends on UIO_CFG_CDC_USE_CUBEMX
+        help
+            Use FS Speed for CubeMX CDC
 
     config UIO_CFG_CDC_TIMEOUT
         int "CDC Timeout (ms)"

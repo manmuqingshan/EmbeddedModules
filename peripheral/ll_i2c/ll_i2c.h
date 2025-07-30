@@ -16,7 +16,6 @@ extern "C" {
 #endif
 #include "modules.h"
 
-
 typedef struct {
     uint8_t* data;     // 数据指针
     uint32_t len;      // 数据长度
@@ -141,18 +140,21 @@ extern void ll_i2c_dump(I2C_TypeDef* i2c, uint8_t addr, uint8_t start,
 /**
  * @brief I2C 事件中断服务函数
  * @param  i2c 中断源      I2Cx 句柄
+ * @note  在I2Cx_EV_IRQHandler()中调用
  */
 extern void ll_i2c_event_irq(I2C_TypeDef* i2c);
 
 /**
  * @brief I2C 错误中断服务函数
  * @param  i2c 中断源      I2Cx 句柄
+ * @note  在I2Cx_ER_IRQHandler()中调用
  */
 extern int ll_i2c_error_irq(I2C_TypeDef* i2c);
 
 /**
- * @brief I2C 组合中断服务函数(ev+er)
+ * @brief I2C 混合中断服务函数(ev+er)
  * @param  i2c 中断源      I2Cx 句柄
+ * @note  在I2Cx_IRQHandler()中调用
  */
 extern void ll_i2c_combine_irq(I2C_TypeDef* i2c);
 

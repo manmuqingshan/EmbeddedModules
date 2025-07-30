@@ -21,6 +21,7 @@ extern "C" {
 #include "lfbb.h"
 #include "lfifo.h"
 #include "usart.h"
+#include "string.h"
 
 /**
  * @brief 串口错误状态

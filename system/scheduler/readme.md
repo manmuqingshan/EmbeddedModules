@@ -317,7 +317,7 @@ void coroutine_main(__async__, void *args)
 }
 ```
 
-该协程用到了局部变量，则使用`CR_INIT_LOCAL_BEGIN()`和`CR_INIT_LOCAL_END()`宏将局部变量的定义包裹起来，**所有的局部变量必须在这两个宏之间定义，且使用`CR_LOCAL(var)`宏来访问局部变量**，除此以外定义的变量都是`临时变量`，他们会在任意一次`AWAIT_*`宏调用后被释放，下一次函数重入时的值是**未定义的**。
+该协程用到了局部变量，则使用`CR_INIT_LOCAL_BEGIN`和`CR_INIT_LOCAL_END`宏将局部变量的定义包裹起来，**所有的局部变量必须在这两个宏之间定义，且使用`CR_LOCAL(var)`宏来访问局部变量**，除此以外定义的变量都是`临时变量`，他们会在任意一次`AWAIT_*`宏调用后被释放，下一次函数重入时的值是**未定义的**。
 
 #### 5.4.2. 宏API （一般在协程函数中调用）
 
@@ -328,7 +328,7 @@ void coroutine_main(__async__, void *args)
     + 功能：声明为无局部变量协程。
     + 是 `CR_INIT` 的别名，可以互相替代。
 
-2. `CR_INIT_LOCAL_START` / `CR_INIT_LOCAL_END` **(调用无分号)**
+2. `CR_INIT_LOCAL_BEGIN` / `CR_INIT_LOCAL_END` **(调用无分号)**
 
     + 功能：声明为有局部变量协程。
     + 注意：二者需成对使用。
@@ -397,7 +397,7 @@ void coroutine_main(__async__, void *args) {
       + `us`：等待时间(us)。
 
 > [!TIP]
-> AWAIT_DELAY宏可以类比Python中的`await asyncio.sleep()`，用于等待一段时间。
+> DELAY宏可以类比Python中的`await asyncio.sleep()`，用于等待一段时间。
 
 7. `CR_YIELD_UNTIL(cond)`
 

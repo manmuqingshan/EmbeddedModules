@@ -55,11 +55,13 @@ static inline int __putchar(int ch) {
 #if UIO_CFG_PRINTF_USE_RTT
     SEGGER_RTT_Write(0, &ch, 1);
 #elif UIO_CFG_PRINTF_USE_CDC && UIO_CFG_ENABLE_CDC
-    cdc_write(&ch, 1);
+    uint8_t ch_buf = (uint8_t)ch;
+    cdc_write(&ch_buf, 1);
 #elif UIO_CFG_PRINTF_USE_ITM
     itm_send_char(0, ch);
 #else
-    uart_write(&UIO_CFG_PRINTF_UART_PORT, (uint8_t*)&ch, 1);
+    uint8_t ch_buf = (uint8_t)ch;
+    uart_write(&UIO_CFG_PRINTF_UART_PORT, &ch_buf, 1);
 #endif  // UIO_CFG_PRINTF_USE_*
     return ch;
 }

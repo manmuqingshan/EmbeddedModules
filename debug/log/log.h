@@ -18,7 +18,9 @@ extern "C" {
 #include "modules.h"
 
 #if UIO_CFG_PRINTF_REDIRECT
+#if __has_include("uni_io.h")
 #include "uni_io.h"
+#endif
 #endif
 
 #if LOG_CFG_CUSTOM_INCLUDE_ENABLE

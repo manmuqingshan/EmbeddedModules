@@ -60,9 +60,9 @@ typedef kl_tick_t m_time_t;
 #define m_time_t_max (KL_WAIT_FOREVER)
 #define init_module_timebase() ((void)0)
 #define m_time_s() (m_time_ms() / 1000)
-#define m_time_ms() (kl_ticks_to_ms(kl_tick_t()))
-#define m_time_us() (kl_ticks_to_us(kl_tick_t()))
-#define m_tick() (kl_tick_t())
+#define m_time_ms() (kl_ticks_to_ms(kl_kernel_tick()))
+#define m_time_us() (kl_ticks_to_us(kl_kernel_tick()))
+#define m_tick() (kl_kernel_tick())
 #define m_tick_clk (KLITE_CFG_FREQ)
 #elif MOD_CFG_TIME_MATHOD_FREERTOS
 #include "FreeRTOS.h"

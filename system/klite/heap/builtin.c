@@ -320,9 +320,9 @@ void kl_heap_stats(kl_heap_stats_t stats) {
 
 #if KLITE_CFG_TRACE_HEAP_OWNER
 
-bool kl_dbg_heap_iter_nodes(void** iter_tmp, kl_thread_t* owner,
-                            kl_size_t* addr, kl_size_t* used,
-                            kl_size_t* avail) {
+bool kl_trace_heap_iter_nodes(void** iter_tmp, kl_thread_t* owner,
+                              kl_size_t* addr, kl_size_t* used,
+                              kl_size_t* avail) {
     heap_node_t node;
 
     heap_mutex_lock();

@@ -8,7 +8,6 @@ from typing import Any, Optional, Tuple
 
 import numpy as np
 import qdarktheme
-from loguru import logger  # noqa: F401
 from main_ui import Ui_MainWindow
 from PySide6 import QtSerialPort
 from PySide6.QtCore import (
@@ -176,7 +175,7 @@ class ScreenManager(QWidget):
         self.cursor_pos = self.window_front_size
         self.x0, self.x1, self.y0, self.y1 = x0, x1, y0, y1
         self.wrap_size = (x0 + self.scr.width - x1 - 1) * self.bitwidth
-        # logger.debug(
+        # print(
         #     f"buf_length: {self.buf_length} window_front_size: {self.window_front_size} window_back_size: {self.window_back_size}, cursor_pos: {self.cursor_pos}, wrap_size: {self.wrap_size}, x0: {self.x0}, x1: {self.x1}, y0: {self.y0}, y1: {self.y1}"
         # )
 
@@ -587,11 +586,9 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         set_font_color(self.labelInfo, "#77bd76")
 
     def user_btn_pressed(self, idx: int):
-        # logger.debug(f"User btn {idx} pressed")
         self.mgr.update_button(idx, True)
 
     def user_btn_released(self, idx: int):
-        # logger.debug(f"User btn {idx} released")
         self.mgr.update_button(idx, False)
 
     def update_screen_info(self):

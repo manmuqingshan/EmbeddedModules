@@ -76,20 +76,28 @@ typedef struct __key_dev {  // 按键设备结构体
     void (*callback)(uint8_t key, uint8_t event);  // 事件回调函数
 
     struct __key {  // 按键状态机数组
-        void (*state)(struct __key_dev*, uint8_t, uint8_t);  // 状态机函数
-        uint16_t count_ms;                                   // 按键计时
-        uint16_t count_temp;                                 // 消抖计时
-        uint8_t multi_count;                                 // 多击计数
+        void (*state)(struct __key_dev*, uint8_t, key_read_e);  // 状态机函数
+        uint16_t count_ms;                                      // 按键计时
+        uint16_t count_temp;                                    // 消抖计时
+        uint8_t multi_count;                                    // 多击计数
     } key_arr[];
 } key_dev_t;
 
 // 默认按键设置
-#define default_key_setting                                                 \
-    {                                                                       \
-        .check_period_ms = 10, .shake_filter_ms = 20, .simple_event = 1,    \
-        .complex_event = 1, .multi_max = 6, .long_ms = 300, .hold_ms = 800, \
-        .multi_ms = 200, .repeat_wait_ms = 600, .repeat_send_ms = 100,      \
-        .repeat_send_speedup = 4, .repeat_send_min_ms = 10,                 \
+#define default_key_setting       \
+    {                             \
+        .check_period_ms = 10,    \
+        .shake_filter_ms = 20,    \
+        .simple_event = 1,        \
+        .complex_event = 1,       \
+        .multi_max = 6,           \
+        .long_ms = 300,           \
+        .hold_ms = 800,           \
+        .multi_ms = 200,          \
+        .repeat_wait_ms = 600,    \
+        .repeat_send_ms = 100,    \
+        .repeat_send_speedup = 4, \
+        .repeat_send_min_ms = 10, \
     }
 
 /******************************* 事件说明 *******************************
@@ -123,7 +131,7 @@ typedef struct __key_dev {  // 按键设备结构体
 
 2.3 DOUBLE:双击, 短按后一定间隔内再次按下
     #####              #################                     ################
-        #<- <long_ms ->#<- <multi_ms ->#<- <repeat_wait_ms ->#`<- >multi_ms ->
+        #<- <long_ms ->#<- <multi_ms ->#<- <repeat_wait_ms ->#<- >multi_ms ->
         ################               #######################
                                        ^DOUBLE                       *DOUBLE^
     (*:当multi_max>=3时需要等待抬起后判断多击才能触发双击事件, 这不影响重复事件)

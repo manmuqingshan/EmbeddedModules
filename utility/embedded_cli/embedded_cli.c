@@ -53,7 +53,7 @@
 
 #define SET_FLAG(flags, flag) ((flags) |= (flag))
 
-#define UNSET_U8FLAG(flags, flag) ((flags) &= (uint8_t) ~(flag))
+#define UNSET_U8FLAG(flags, flag) ((flags) &= (uint8_t)~(flag))
 
 const static char* CLI_INVITATION_COLOR = FMT2(BOLD, BLUE);
 
@@ -249,6 +249,12 @@ struct EmbeddedCliImpl {
    * Pointer to a sub handler to handle raw data inputted to cli
    */
     void (*rawBufferHandler)(EmbeddedCli* cli, const char* buffer, size_t len);
+
+    /**
+   * Pointer to a callback function to handle command execution
+   */
+    void (*onCommandExecution)(EmbeddedCli* cli, CliCommand* command,
+                               bool is_finished);
 
     /**
    * Pointer to a sub interpreter function. If set, this function will
@@ -742,6 +748,19 @@ void embeddedCliResetRawBufferHandler(EmbeddedCli* cli) {
     impl->rawBufferHandler = NULL;
 }
 
+void embeddedCliSetOnCommandExecution(
+    EmbeddedCli* cli,
+    void (*onCommandExecution)(EmbeddedCli* cli, CliCommand* command,
+                               bool is_finished)) {
+    PREPARE_IMPL(cli);
+    impl->onCommandExecution = onCommandExecution;
+}
+
+void embeddedCliResetOnCommandExecution(EmbeddedCli* cli) {
+    PREPARE_IMPL(cli);
+    impl->onCommandExecution = NULL;
+}
+
 static void printInvitation(EmbeddedCli* cli) {
     PREPARE_IMPL(cli);
     if (!IS_FLAG_SET(impl->flags, CLI_FLAG_INIT_COMPLETE)) {
@@ -961,6 +980,16 @@ const char* embeddedCliGetToken(const char* tokenizedStr, int16_t pos) {
         return &tokenizedStr[i];
     else
         return NULL;
+}
+
+const char* embeddedCliPopToken(char** tokenizedStr) {
+    if (tokenizedStr == NULL || *tokenizedStr == NULL || **tokenizedStr == '\0')
+        return NULL;
+    char* token = *tokenizedStr;
+    while (**tokenizedStr != '\0')
+        (*tokenizedStr)++;
+    (*tokenizedStr)++;
+    return token;
 }
 
 char* embeddedCliGetTokenVariable(char* tokenizedStr, int16_t pos) {
@@ -1226,11 +1255,8 @@ static void parseCommand(EmbeddedCli* cli) {
 
     // if sub interpreter is set, use it to process command
     if (IS_FLAG_SET(impl->flags, CLI_FLAG_SUB_INTERPRETER_ENABLED)) {
-        CliCommand command;
-        command.name = cmdName;
-        command.args = cmdArgs;
-
-        impl->subInterpreterOnCmd(cli, &command);
+        impl->subInterpreterOnCmd(
+            cli, &(CliCommand){.name = cmdName, .args = cmdArgs});
         return;
     }
 
@@ -1252,7 +1278,17 @@ static void parseCommand(EmbeddedCli* cli) {
                     embeddedCliTokenizeArgs(cmdArgs);
 
                 impl->currentBinding = i;
+                if (impl->onCommandExecution != NULL) {
+                    impl->onCommandExecution(
+                        cli, &(CliCommand){.name = cmdName, .args = cmdArgs},
+                        false);
+                }
                 impl->bindings[i].func(cli, cmdArgs, impl->bindings[i].context);
+                if (impl->onCommandExecution != NULL) {
+                    impl->onCommandExecution(
+                        cli, &(CliCommand){.name = cmdName, .args = cmdArgs},
+                        true);
+                }
                 impl->currentBinding = impl->bindingsCount + 1;
             }
             UNSET_U8FLAG(impl->flags, CLI_FLAG_DIRECT_PRINT);
@@ -1291,6 +1327,8 @@ static const char* toUpper(EmbeddedCli* cli, const char* str) {
 }
 
 static void printBindingHelp(EmbeddedCli* cli, CliCommandBinding* binding) {
+    if (binding->name[0] == '_' && binding->name[1] == '_')
+        return;  // hidden command
     writeToOutputColor(cli, " * ", CLI_HELP_HEADER_COLOR);
     writeToOutputColor(cli, binding->name, CLI_HELP_HEADER_COLOR);
     writeToOutput(cli, lineBreak);
@@ -1486,6 +1524,18 @@ static AutocompletedCommand getAutocompletedCommand(EmbeddedCli* cli,
     }
 
     return cmd;
+}
+
+void (*embeddedCliSwitchToCommandEntry(EmbeddedCli* cli, const char* name))(
+    EmbeddedCli* cli, char* args, void* context) {
+    PREPARE_IMPL(cli);
+    for (int i = 0; i < impl->bindingsCount; ++i) {
+        if (strcmp(impl->bindings[i].name, name) == 0) {
+            impl->currentBinding = i;
+            return impl->bindings[i].func;
+        }
+    }
+    return NULL;
 }
 
 static void printLiveAutocompletion(EmbeddedCli* cli) {

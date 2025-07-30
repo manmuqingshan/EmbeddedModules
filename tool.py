@@ -132,7 +132,7 @@ class Module:
 
 
 @lru_cache()
-def list_module_types(dir) -> List[str]:
+def list_module_types(dir: str = ".") -> List[str]:
     module_types = [
         d
         for d in os.listdir(dir)

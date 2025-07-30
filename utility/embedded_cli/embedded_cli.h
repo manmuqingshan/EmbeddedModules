@@ -284,6 +284,14 @@ void embeddedCliPrint(EmbeddedCli* cli, const char* string);
 void embeddedCliFree(EmbeddedCli* cli);
 
 /**
+ * @brief Get command entry from cli and switch to it (Professional only)
+ * @param cli
+ * @return command entry
+ */
+void (*embeddedCliSwitchToCommandEntry(EmbeddedCli* cli, const char* name))(
+    EmbeddedCli* cli, char* args, void* context);
+
+/**
  * Perform tokenization of arguments string. Original string is modified and
  * should not be used directly (only inside other token functions).
  * Individual tokens are separated by single 0x00 char, double 0x00 is put at
@@ -304,6 +312,13 @@ void embeddedCliTokenizeArgs(char* args);
  * @return token
  */
 const char* embeddedCliGetToken(const char* tokenizedStr, int16_t pos);
+
+/**
+ * @brief Pop first token from tokenized string
+ * @param tokenizedStr pointer to tokenized string
+ * @return token or NULL if no token left
+ */
+const char* embeddedCliPopToken(char** tokenizedStr);
 
 /**
  * Same as embeddedCliGetToken but works on non-const buffer
@@ -435,6 +450,22 @@ void embeddedCliSetRawBufferHandler(EmbeddedCli* cli,
  * @param cli
  */
 void embeddedCliResetRawBufferHandler(EmbeddedCli* cli);
+
+/**
+ * @brief Set onCommandExecution callback
+ * @param cli
+ * @param onCommandExecution called before and after command execution
+ */
+void embeddedCliSetOnCommandExecution(
+    EmbeddedCli* cli,
+    void (*onCommandExecution)(EmbeddedCli* cli, CliCommand* command,
+                               bool is_finished));
+
+/**
+ * @brief Reset onCommandExecution callback
+ * @param cli
+ */
+void embeddedCliResetOnCommandExecution(EmbeddedCli* cli);
 
 #ifdef __cplusplus
 }
